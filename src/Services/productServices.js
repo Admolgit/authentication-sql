@@ -57,104 +57,106 @@ const createProduct = async (req, res) => {
 };
 
 const updateProduct = (req, res) => {
+
+  const { id } = req.params;
+  
   const form = new formidable.IncomingForm();
 
-    form.options.keepExtensions = true;
+  form.options.keepExtensions = true;
 
-    form.parse(req, async (err, fields, files) => {
-      if (err) {
+  form.parse(req, async (err, fields, files) => {
+    if (err) {
+      return res.status(400).json({
+        error: "Image could not be uploaded",
+      });
+    }
+
+    // Checking for all fields
+    const { name, price, category, description } = fields;
+
+    if (!name || !price || !category || !description) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    let image;
+    if (files.image) {
+      if (files.image.size > 1000000) {
         return res.status(400).json({
-          error: "Image could not be uploaded",
+          error: "Image should not be greater than 1mb",
         });
       }
+      image = files.image.filepath;
+    }
 
-      // Checking for all fields
-      const {id, name, price, category, description } = fields;
-
-      if (!id || !name || !price || !category || !description) {
-        return res.status(400).json({ error: "All fields are required" });
+    configDb.query(
+      `UPDATE Products SET id=?, name=?, price=?, category=?, description=?, image=? WHERE id="${id}"`,
+      [id, name, price, category, description, image],
+      async (err, data) => {
+        console.log(data, "DATA");
+        res.status(200).json({
+          message: "Product successfully updated",
+          updateProduct: data,
+        });
       }
-
-      let image;
-      if (files.image) {
-        if (files.image.size > 1000000) {
-          return res.status(400).json({
-            error: "Image should not be greater than 1mb",
-          });
-        }
-        image = files.image.filepath;
-      }
-      
-      // configDb.query(`SELECT * FROM Products`, (err, products) => {
-      //   if(err) {
-      //     res.status(404).json({
-      //       message: err.message
-      //     })
-      //   }
-      //   const productId = products.map(product => product.id)
-        
-        configDb.query(
-          `UPDATE Products SET id=?, name=?, price=?, category=?, description=?, image=? WHERE id="${id}"`, [id, name, price, category, description, image],
-          async (err, data) => {
-            
-            console.log(data, "DATA")
-            res.status(200).json({
-              message: "Product successfully updated",
-              updateProduct: data
-            });
-          }
-        );
-      })
-    // })
-}
+    );
+  });
+};
 
 const getProducts = (req, res) => {
   try {
     configDb.query(`SELECT * FROM Products`, (err, products) => {
       res.status(200).json({
-        message: 'Product fetched',
-        products: products
-      })
-    })
+        message: "Product fetched",
+        products: products,
+      });
+    });
   } catch (error) {
     return res.status(500).json({
       Message: "Something went wrong",
-    })
+    });
   }
 };
 
 const getProductByName = (req, res) => {
-  const {name} = req.query
+  const { name } = req.query;
   try {
-    configDb.query(`SELECT * FROM Products WHERE name=?`,[name], (err, product) => {
-      res.status(200).json({
-        message: 'Product(s) fetched',
-        products: product
-      })
-    })
+    configDb.query(
+      `SELECT * FROM Products WHERE name=?`,
+      [name],
+      (err, product) => {
+        res.status(200).json({
+          message: "Product(s) fetched",
+          products: product,
+        });
+      }
+    );
   } catch (error) {
     return res.status(500).json({
       message: "Something went wrong",
-    })
+    });
   }
 };
 
 const getAProduct = (req, res) => {
-  const {id} = req.params;
-  
+  const { id } = req.params;
+
   try {
-    configDb.query(`SELECT * FROM Products WHERE id = ?`, [id], (err, product) => {
-      res.status(200).json({
-        message: 'Product fetched by id',
-        products: product
-      })
-    })
+    configDb.query(
+      `SELECT * FROM Products WHERE id = ?`,
+      [id],
+      (err, product) => {
+        res.status(200).json({
+          message: "Product fetched by id",
+          products: product,
+        });
+      }
+    );
   } catch (error) {
     return res.status(500).json({
-      message: 'Something went wrong',
-    })
+      message: "Something went wrong",
+    });
   }
-}
+};
 
 module.exports = {
   createProduct,
