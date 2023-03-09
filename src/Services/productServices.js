@@ -69,9 +69,9 @@ const updateProduct = (req, res) => {
       }
 
       // Checking for all fields
-      const { name, price, category, description } = fields;
+      const {id, name, price, category, description } = fields;
 
-      if (!name || !price || !category || !description) {
+      if (!id || !name || !price || !category || !description) {
         return res.status(400).json({ error: "All fields are required" });
       }
 
@@ -85,23 +85,27 @@ const updateProduct = (req, res) => {
         image = files.image.filepath;
       }
       
-      configDb.query(`SELECT * FROM Products`, (err, products) => {
-        let productName = products.map(product => product.image)
+      // configDb.query(`SELECT * FROM Products`, (err, products) => {
+      //   if(err) {
+      //     res.status(404).json({
+      //       message: err.message
+      //     })
+      //   }
+      //   const productId = products.map(product => product.id)
         
         configDb.query(
-          `UPDATE Products SET name="${name}", price="${price}", category="${category}", description="${description}", image="${image}" WHERE image="${productName}"`,
+          `UPDATE Products SET id=?, name=?, price=?, category=?, description=?, image=? WHERE id="${id}"`, [id, name, price, category, description, image],
           async (err, data) => {
             
             console.log(data, "DATA")
             res.status(200).json({
               message: "Product successfully updated",
-              updateProduct: data,
-              product: products
+              updateProduct: data
             });
           }
         );
       })
-    })
+    // })
 }
 
 const getProducts = (req, res) => {
