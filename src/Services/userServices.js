@@ -28,7 +28,7 @@ const registerUser = async (req, res) => {
             `INSERT INTO Users(fullName, email, password) VALUES (?, ?, ?)`,
             [fullName, email, hashedPassword],
             async (err, data) => {
-              res.status(200).json({
+              res.status(201).json({
                 message: "User registered successfully",
                 user: data,
               });

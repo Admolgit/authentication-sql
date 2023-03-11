@@ -42,7 +42,7 @@ const createProduct = async (req, res) => {
               message: "Product already exists",
             });
           }
-          res.status(200).json({
+          res.status(201).json({
             message: "Product successfully created",
             user: data,
           });
@@ -57,9 +57,8 @@ const createProduct = async (req, res) => {
 };
 
 const updateProduct = (req, res) => {
-
   const { id } = req.params;
-  
+
   const form = new formidable.IncomingForm();
 
   form.options.keepExtensions = true;
@@ -88,18 +87,45 @@ const updateProduct = (req, res) => {
       image = files.image.filepath;
     }
 
+    try {
+      configDb.query(
+        `UPDATE Products SET id=?, name=?, price=?, category=?, description=?, image=? WHERE id="${id}"`,
+        [id, name, price, category, description, image],
+        async (err, data) => {
+          console.log(data, "DATA");
+          res.status(200).json({
+            message: "Product successfully updated",
+            updateProduct: data,
+          });
+        }
+      );
+    } catch (error) {
+      res.status(500).json({
+        error: error.message,
+      });
+    }
+  });
+};
+
+const deleteProduct = (req, res) => {
+  const { id } = req.params;
+  console.log("delete", id);
+
+  try {
     configDb.query(
-      `UPDATE Products SET id=?, name=?, price=?, category=?, description=?, image=? WHERE id="${id}"`,
-      [id, name, price, category, description, image],
+      `DELETE FROM Products WHERE id="${id}"`,
       async (err, data) => {
-        console.log(data, "DATA");
         res.status(200).json({
-          message: "Product successfully updated",
+          message: "Product successfully deleted",
           updateProduct: data,
         });
       }
     );
-  });
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+    });
+  }
 };
 
 const getProducts = (req, res) => {
@@ -145,10 +171,16 @@ const getAProduct = (req, res) => {
       `SELECT * FROM Products WHERE id = ?`,
       [id],
       (err, product) => {
-        res.status(200).json({
-          message: "Product fetched by id",
-          products: product,
-        });
+        if(product.length === 0) {
+          res.status(404).json({
+            message: 'Product not found',
+          })
+        } else {
+          res.status(200).json({
+            message: "Product fetched by id",
+            products: product,
+          });
+        }
       }
     );
   } catch (error) {
@@ -162,6 +194,7 @@ module.exports = {
   createProduct,
   getProducts,
   updateProduct,
+  deleteProduct,
   getProductByName,
   getAProduct,
 };
