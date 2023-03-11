@@ -1,4 +1,5 @@
 const express = require("express");
+const helmet = require("helmet")
 require("dotenv").config();
 const cors = require("cors");
 const morgan = require("morgan");
@@ -11,6 +12,7 @@ const app = express();
 const user = require("./src/Routes/user");
 const product = require("./src/Routes/product");
 
+app.use(helmet())
 app.use(morgan('dev'));
 app.use(express.json({ limit: "900mb" }));
 app.use(express.urlencoded({ extended: true, limit: "900mb" }));
