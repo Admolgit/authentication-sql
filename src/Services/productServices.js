@@ -131,7 +131,8 @@ const deleteProduct = (req, res) => {
 const getProducts = (req, res) => {
   try {
     configDb.query(`SELECT * FROM Products`, (err, products) => {
-      res.status(200).json({
+      if(err) throw err.message;
+      return res.status(200).json({
         message: "Product fetched",
         products: products,
       });

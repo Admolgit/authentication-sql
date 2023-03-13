@@ -51,13 +51,21 @@ const userLogin = async (req, res, next) => {
   configDb.query(
     `SELECT fullName, email, password FROM Users WHERE email=?`,
     [email],
-    (err, result) => {
+    async (err, result) => {
       try {
+        if(err) throw err;
+        if(!result[0] || !bcrypt.compareSync(plainPassword, password)) {
+          return res.status(401).json({
+            message: 'Incorrect email and password'
+          })
+        }
         if (result.length > 0) {
-          const { fullName, email, password } = result[0];
+          const { email, password } = result[0];
           if (bcrypt.compareSync(plainPassword, password)) {
-            const user = { fullName, email, password };
-            const token = jwt.sign({ data: result[0] }, "secret");
+            const user = { email, password };
+            const token = jwt.sign({ data: result[0] }, process.env.JWT_SECRET, {
+              httpOnly: true,
+            });
 
             res.status(200).json({
               message: "Login successful.",
