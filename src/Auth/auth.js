@@ -11,7 +11,7 @@ const Auth = (req, res, next) => {
 
     try {
       // Using Config module to read token validities.
-      const decoded = jwt.verify(token, process.env.JWT_SECRET)
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
       return decoded;
 

@@ -23,8 +23,6 @@ app.use(cors());
 app.use("/user", user);
 app.use("/", product)
 
-const PORT = process.env.PORT || 3001;
-
 app.get("/createdb", (req, res) => {
   console.log("createdb");
   let sql = "CREATE DATABASE Authentications";
@@ -34,5 +32,7 @@ app.get("/createdb", (req, res) => {
     res.send("Database create");
   });
 });
+
+const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, console.log(`Server running on port ${PORT}`));
