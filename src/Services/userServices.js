@@ -52,20 +52,26 @@ const userLogin = async (req, res, next) => {
     `SELECT fullName, email, password FROM Users WHERE email=?`,
     [email],
     async (err, result) => {
+      console.log(result[0])
+      console.log(plainPassword, result[0].password)
       try {
-        if(err) throw err;
-        if(!result[0] || !bcrypt.compareSync(plainPassword, password)) {
+        if (err) throw new err;
+        if (!result[0] || !bcrypt.compareSync(plainPassword, result[0].password)) {
           return res.status(401).json({
-            message: 'Incorrect email and password'
-          })
+            message: "Incorrect email and password",
+          });
         }
         if (result.length > 0) {
           const { email, password } = result[0];
           if (bcrypt.compareSync(plainPassword, password)) {
             const user = { email, password };
-            const token = jwt.sign({ data: result[0] }, process.env.JWT_SECRET, {
-              httpOnly: true,
-            });
+            const token = jwt.sign(
+              { data: result[0] },
+              process.env.JWT_SECRET,
+              // {
+              //   httpOnly: false,
+              // }
+            );
 
             res.status(200).json({
               message: "Login successful.",
@@ -104,25 +110,28 @@ const getUser = (req, res) => {
 
 const getAUser = (req, res) => {
   const id = req.params.id;
-  
-  configDb.query(`SELECT id, fullName, email, password FROM Users WHERE id=?`,
-  [id], (err, data) => {
-    if(err) {
-      res.status(400).json({
-        error: err.message
-      })
-    } else if(data.length) {
-      return res.status(200).json({
-        message: "User found",
-        data: data
-      })
-    } else {
-      res.status(400).json({
-        message: "User does not exist"
-      })
+
+  configDb.query(
+    `SELECT id, fullName, email, password FROM Users WHERE id=?`,
+    [id],
+    (err, data) => {
+      if (err) {
+        res.status(400).json({
+          error: err.message,
+        });
+      } else if (data.length) {
+        return res.status(200).json({
+          message: "User found",
+          data: data,
+        });
+      } else {
+        res.status(400).json({
+          message: "User does not exist",
+        });
+      }
     }
-  })
-}
+  );
+};
 
 module.exports = {
   userLogin,
