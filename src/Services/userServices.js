@@ -19,7 +19,7 @@ const registerUser = async (req, res) => {
     [email],
     async (err, data) => {
       try {
-        if (data.length > 0) {
+        if (data[0].length > 0) {
           res.status(200).json({
             message: "User already exists",
           });
