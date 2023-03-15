@@ -68,9 +68,6 @@ const userLogin = async (req, res, next) => {
             const token = jwt.sign(
               { data: result[0] },
               process.env.JWT_SECRET,
-              // {
-              //   httpOnly: false,
-              // }
             );
 
             res.status(200).json({
