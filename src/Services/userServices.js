@@ -98,6 +98,10 @@ const getUser = (req, res) => {
         message: "No users found",
       });
     } else {
+      // Hiding each users password from the response
+      data.forEach((user) => {
+        user.password = undefined
+      })
       res.status(200).json({
         datas: data,
       });

@@ -1,35 +1,30 @@
 const dotenv = require("dotenv");
-const jwt = require("jsonwebtoken");
+const { verify } = require("jsonwebtoken");
 
 dotenv.config();
 
-const Auth = (req, res, next) => {
-  let token;
-
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith("Bearer ")
-  ) {
-    token = req.headers.authorization.split(" ")[1];
-
-    try {
-      // Using Config module to read token validities.
-      if (token) {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-        return decoded;
+const authGuard = (req, res, next) => {
+  let token = req.get("authorization");
+  
+  if (token) {
+    token = token.split(" ")[1];
+    
+    verify(token, process.env.JWT_SECRET, (err, decoded) => {
+      if (err) {
+        res.json({
+          success: 0,
+          message: "Invalid token",
+        });
+      } else {
+        next();
       }
-    } catch (error) {
-      return res.status(400).json({
-        message: error.message,
-        error: "Invalid token",
-      });
-    }
-  }
-
-  if (!token) {
-    return res.status(401).json("You are not authorized");
+    });
+  } else {
+    res.json({
+      success: 0,
+      message: "Access denied! unathorized user",
+    });
   }
 };
 
-module.exports = Auth;
+module.exports = authGuard;
