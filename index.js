@@ -12,6 +12,7 @@ const app = express();
 const user = require("./src/Routes/user");
 const product = require("./src/Routes/product");
 
+// Application middlewares
 app.use(helmet())
 app.use(morgan('dev'));
 app.use(express.json({ limit: "900mb" }));
@@ -23,6 +24,7 @@ app.use(cors());
 app.use("/user", user);
 app.use("/", product)
 
+// Creating database
 app.get("/createdb", (req, res) => {
   console.log("createdb");
   let sql = "CREATE DATABASE Authentications";
